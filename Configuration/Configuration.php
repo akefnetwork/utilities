@@ -106,6 +106,6 @@ return [
         'available_locales' => ['en', 'es', 'fr'],
         'default_locale' => env('APP_LOCALE', 'en'),
         'translations_path' => APP_ROOT . '/lang', // Ensure this directory exists and contains translation files.
-
+    ],
     // ... other configurations ...
 ];
