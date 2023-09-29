@@ -92,5 +92,20 @@ return [
         // ... additional utility paths ...
     ],
 
+    /**
+     * --------------------------------------------------------------------------
+     * Localization Configuration
+     * --------------------------------------------------------------------------
+     * 
+     * Configuration settings related to localization and internationalization 
+     * of the application. This includes the available locales, default locale, 
+     * and the path to the translations files.
+     * 
+     */
+    'localization' => [
+        'available_locales' => ['en', 'es', 'fr'],
+        'default_locale' => env('APP_LOCALE', 'en'),
+        'translations_path' => APP_ROOT . '/lang', // Ensure this directory exists and contains translation files.
+
     // ... other configurations ...
 ];
