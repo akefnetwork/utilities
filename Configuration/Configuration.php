@@ -32,6 +32,35 @@ return [
 
     /**
      * --------------------------------------------------------------------------
+     * Session Configuration
+     * --------------------------------------------------------------------------
+     * 
+     * Here you may define all of the session settings for your application including
+     * session timeout, cookie settings, and others.
+     * 
+     */
+    'session' => [
+        'timeout' => env('SESSION_TIMEOUT', 1800), // 30 minutes
+        'cookie_httponly' => true,
+        'cookie_secure' => env('SESSION_COOKIE_SECURE', false), // Set to true if using HTTPS
+    ],
+
+    /**
+     * --------------------------------------------------------------------------
+     * Error Handling Configuration
+     * --------------------------------------------------------------------------
+     * 
+     * Configuration settings related to how errors and exceptions are handled
+     * in your application. This includes log settings, display settings, etc.
+     * 
+     */
+    'error_handling' => [
+        'display_errors' => env('DISPLAY_ERRORS', false),
+        // ... other error handling configurations ...
+    ],
+
+    /**
+     * --------------------------------------------------------------------------
      * Available Locales
      * --------------------------------------------------------------------------
      * 
