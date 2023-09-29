@@ -30,6 +30,7 @@ class LoggerTest extends TestCase
     
     public function testLogMessage()
     {
+        $sessionManager = SessionManager::getInstance();
         // Define a sample log message.
         $message = 'INFO_MESSAGE';
         $level = 'info';
