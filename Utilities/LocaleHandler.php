@@ -45,7 +45,7 @@ class LocaleHandler implements LocaleHandlerInterface
         return static::$instance;
     }
 
-    private function setLocale(string $defaultLocale): void
+    public function setLocale(string $defaultLocale): void
     {
         // 1. Check for a user's preference stored in session.
         $this->locale = SessionManager::getInstance()->getUserPreferredLocale();
