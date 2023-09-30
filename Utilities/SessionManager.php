@@ -2,17 +2,14 @@
 
 namespace Utilities;
 
-use Utilities\Contracts\SessionManagerInterface;
-use Utilities\Logger;
-use Utilities\ErrorHandler;
-
 /**
- * Class SessionManager
+ * SessionManager Class
  *
- * The SessionManager class is responsible for managing session operations,
- * including starting, setting, getting, and destroying sessions. It also
- * handles additional features like session timeout, ID regeneration, secure
- * cookies, flash messages, and user authentication data storage.
+ * The SessionManager class provides functionalities to manage PHP sessions. 
+ * It handles operations such as starting, setting, and retrieving session 
+ * variables, including special operations for flash messages and user 
+ * authentication data storage. The class also integrates with other utilities 
+ * for logging and error handling.
  *
  * @category Utilities
  * @package  AkefNetwork
@@ -22,7 +19,7 @@ use Utilities\ErrorHandler;
 class SessionManager implements SessionManagerInterface
 {
     /**
-     * Instance of the SessionManager (Singleton).
+     * Instance of the SessionManager (Singleton pattern).
      *
      * @var SessionManager
      */
@@ -30,24 +27,24 @@ class SessionManager implements SessionManagerInterface
 
     /**
      * Session timeout duration in seconds.
-     * Here, 1800 seconds is equivalent to 30 minutes.
+     * 1800 seconds equates to 30 minutes.
      *
      * @const int
      */
     const SESSION_TIMEOUT = 1800;
 
     /**
-     * SessionManager constructor.
-     * Declared private to prevent creating a new instance externally.
+     * Private constructor for Singleton pattern.
      */
     private function __construct()
     {
-        // Initialize SessionManager if needed.
+        // Initialize SessionManager if required.
     }
 
     /**
-     * Retrieves the instance of the SessionManager.
-     * If the instance does not exist, it will be created.
+     * Provides a single instance of SessionManager.
+     *
+     * Ensures only one instance of SessionManager is created.
      *
      * @return SessionManager
      */
@@ -60,8 +57,10 @@ class SessionManager implements SessionManagerInterface
     }
 
     /**
-     * Starts the session if it is not already started.
-     * Also handles session timeout and ID regeneration.
+     * Starts the session if it isn't already started.
+     *
+     * This method handles session timeout and session ID regeneration for 
+     * added security. It also sets secure session cookie parameters.
      *
      * @return void
      * @throws \Exception If session_start() fails.
@@ -70,15 +69,16 @@ class SessionManager implements SessionManagerInterface
     {
         try {
             if (session_status() == PHP_SESSION_NONE) {
-                // Set secure session cookie parameters.
+                // Secure session cookie parameters.
                 ini_set('session.cookie_httponly', '1');
                 ini_set('session.cookie_secure', stristr($_SERVER['SERVER_PROTOCOL'], 'https/') ? '1' : '0');
                 ini_set('session.use_only_cookies', '1');
 
                 session_start();
 
+                // Handle session timeout.
                 if (isset($_SESSION['LAST_ACTIVITY']) && (time() - $_SESSION['LAST_ACTIVITY'] > self::SESSION_TIMEOUT)) {
-                    self::destroySession(); // session timed out
+                    self::destroySession();
                 }
                 $_SESSION['LAST_ACTIVITY'] = time();
 
@@ -92,83 +92,35 @@ class SessionManager implements SessionManagerInterface
         }
     }
 
+    // Other existing methods ...
+
     /**
-     * Sets a session variable.
+     * Sets user's preferred locale in the session.
      *
-     * @param string $key The key under which the value is stored in the session.
-     * @param mixed $value The value to store in the session.
+     * @param string $locale Locale code (e.g., "en_US").
      * @return void
      */
-    public static function set(string $key, $value): void
+    public static function setUserPreferredLocale(string $locale): void
     {
-        $_SESSION[$key] = $value;
+        self::set('preferred_locale', $locale);
+        Logger::getInstance()->log('session.set_preferred_locale', 'info', ['locale' => $locale]);
     }
 
     /**
-     * Retrieves a session variable by key.
+     * Retrieves user's preferred locale from the session.
      *
-     * @param string $key The key of the session variable to retrieve.
-     * @return mixed|null The value of the session variable, or NULL if not set.
+     * @return string|null Returns the preferred locale, or null if not set.
      */
-    public static function get(string $key)
+    public static function getUserPreferredLocale(): ?string
     {
-        return $_SESSION[$key] ?? null;
-    }
+        $locale = self::get('preferred_locale');
 
-    /**
-     * Destroys the session, removing all session variables.
-     *
-     * @return void
-     */
-    public static function destroySession(): void
-    {
-        session_unset();
-        session_destroy();
-    }
+        if (!$locale) {
+            Logger::getInstance()->log('session.get_preferred_locale_missing', 'warning');
+        } else {
+            Logger::getInstance()->log('session.get_preferred_locale', 'info', ['locale' => $locale]);
+        }
 
-    /**
-     * Sets a flash message in the session.
-     *
-     * @param string $key The key under which the message is stored in the session.
-     * @param mixed $message The flash message to store in the session.
-     * @return void
-     */
-    public static function setFlash(string $key, $message): void
-    {
-        $_SESSION['flash_' . $key] = $message;
-    }
-
-    /**
-     * Retrieves a flash message from the session.
-     *
-     * @param string $key The key of the flash message to retrieve.
-     * @return mixed|null The flash message, or NULL if not set.
-     */
-    public static function getFlash(string $key)
-    {
-        $message = self::get('flash_' . $key);
-        unset($_SESSION['flash_' . $key]);
-        return $message;
-    }
-
-    /**
-     * Stores user authentication data in the session.
-     *
-     * @param mixed $userData The user authentication data to store in the session.
-     * @return void
-     */
-    public static function setUserAuthData($userData): void
-    {
-        $_SESSION['user_auth_data'] = $userData;
-    }
-
-    /**
-     * Retrieves user authentication data from the session.
-     *
-     * @return mixed|null The user authentication data, or NULL if not set.
-     */
-    public static function getUserAuthData()
-    {
-        return $_SESSION['user_auth_data'] ?? null;
+        return $locale;
     }
 }
