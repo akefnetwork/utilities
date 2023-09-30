@@ -23,7 +23,7 @@ class LoggerTest extends TestCase
         // Instantiate Logger with dependencies.
         $this->logger = Logger::getInstance(
             SessionManager::getInstance(),
-            new ErrorHandler(),
+            ErrorHandler::getInstance(),
             $this->logFilePath
         );
     }
