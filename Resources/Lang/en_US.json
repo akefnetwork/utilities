@@ -10,5 +10,6 @@
     "localehandler.translation_success": "Translation for key {key} retrieved successfully.",
     "localehandler.translation_failure": "Failed to retrieve translation for key {key}.",
     "errorhandler.handle_success": "Error handled successfully.",
-    "errorhandler.handle_failure": "Failed to handle the error."
+    "errorhandler.handle_failure": "Failed to handle the error.",
+    "test.key": "Test Value"
 }
