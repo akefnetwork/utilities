@@ -63,7 +63,7 @@ class LocaleHandler implements LocaleHandlerInterface
         Logger::getInstance()->log('localehandler.setlocale', 'info', ['locale' => $this->locale]);
     }
 
-    private function loadTranslations(): void
+    public function loadTranslations(): void
     {
         $filePath = $this->translationFilePath . $this->locale . '.json';
 
