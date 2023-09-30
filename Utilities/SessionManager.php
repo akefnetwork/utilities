@@ -2,6 +2,9 @@
 
 namespace Utilities;
 
+use Utilities\Contracts\SessionManagerInterface;
+
+
 /**
  * SessionManager Class
  *
