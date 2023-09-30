@@ -2,7 +2,6 @@
 
 namespace Utilities\Contracts;
 
-
 /**
  * Interface SessionManagerInterface
  *
