@@ -1,0 +1,14 @@
+{
+    "session.start_success": "Session started successfully.",
+    "session.start_failure": "Failed to start the session.",
+    "session.destroy_success": "Session destroyed successfully.",
+    "session.destroy_failure": "Failed to destroy the session.",
+    "logger.init_success": "Logger initialized successfully.",
+    "logger.init_failure": "Logger initialization failed.",
+    "localehandler.init_success": "LocaleHandler initialized successfully with locale {locale}.",
+    "localehandler.init_error": "LocaleHandler initialization failed due to: {error}.",
+    "localehandler.translation_success": "Translation for key {key} retrieved successfully.",
+    "localehandler.translation_failure": "Failed to retrieve translation for key {key}.",
+    "errorhandler.handle_success": "Error handled successfully.",
+    "errorhandler.handle_failure": "Failed to handle the error."
+}
