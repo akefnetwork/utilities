@@ -3,8 +3,6 @@
 namespace Utilities;
 
 use Utilities\Contracts\LocaleHandlerInterface;
-use Utilities\Logger;
-use Utilities\ErrorHandler;
 use Exception;
 
 /**
@@ -32,9 +30,9 @@ class LocaleHandler implements LocaleHandlerInterface
         try {
             $this->setLocale($defaultLocale);
             $this->loadTranslations();
-            Logger::log('localehandler.init_success', 'info', ['locale' => $this->locale]);
+            Logger::getInstance()->log('localehandler.init_success', 'info', ['locale' => $this->locale]);
         } catch (Exception $e) {
-            ErrorHandler::handleError('localehandler.init_error', ['error' => $e->getMessage()]);
+            ErrorHandler::getInstance()->handleError('localehandler.init_error', $e->getMessage());
         }
     }
 
@@ -49,26 +47,49 @@ class LocaleHandler implements LocaleHandlerInterface
 
     private function setLocale(string $defaultLocale): void
     {
-        // TODO: Implement the logic to determine and set the user's locale.
-        // Use the $defaultLocale if the locale cannot be determined.
-        // Log the determined locale.
-        // Handle errors if the locale cannot be determined or is not supported.
+        // 1. Check for a user's preference stored in session.
+        $this->locale = SessionManager::getInstance()->getUserPreferredLocale();
+
+        // 2. If not set, check the browser's Accept-Language header.
+        if (!$this->locale && isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])) {
+            $this->locale = substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2);
+        }
+
+        // 3. Fallback to the provided default locale if necessary.
+        if (!$this->locale) {
+            $this->locale = $defaultLocale;
+        }
+
+        Logger::getInstance()->log('localehandler.setlocale', 'info', ['locale' => $this->locale]);
     }
 
     private function loadTranslations(): void
     {
-        // TODO: Load the translations from a file based on the determined locale.
-        // Use the $this->translationFilePath to locate the file.
-        // Log if the translations are successfully loaded.
-        // Handle errors if the translation file is missing or malformed.
+        $filePath = $this->translationFilePath . $this->locale . '.json';
+
+        if (!file_exists($filePath)) {
+            ErrorHandler::getInstance()->handleError('localehandler.translations_not_found', "Translation file for {$this->locale} not found.");
+            return;
+        }
+
+        $this->translations = json_decode(file_get_contents($filePath), true);
+
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            ErrorHandler::getInstance()->handleError('localehandler.translations_load_error', 'Error decoding translation file.');
+        }
+
+        Logger::getInstance()->log('localehandler.translations_loaded', 'info', ['locale' => $this->locale]);
     }
 
     public function translate(string $key): string
     {
-        // TODO: Retrieve the localized text using the given locale key.
-        // Fallback to a default language or message if the key doesn't exist.
-        // Log the translation retrieval.
-        // Handle errors if the key doesn't exist in any of the available translations.
-        return $key; // Temporary return, replace with actual implementation.
+        if (isset($this->translations[$key])) {
+            return $this->translations[$key];
+        }
+
+        Logger::getInstance()->log('localehandler.translation_not_found', 'warning', ['key' => $key]);
+
+        // Fallback to key if translation doesn't exist.
+        return $key;
     }
 }
