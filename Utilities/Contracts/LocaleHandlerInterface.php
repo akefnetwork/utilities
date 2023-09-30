@@ -22,7 +22,8 @@ interface LocaleHandlerInterface
      *
      * @return void
      */
-    public function setLocale(): void;
+    public function setLocale(string $defaultLocale): void;
+
 
     /**
      * Load translations for the current locale.
