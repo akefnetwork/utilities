@@ -4,6 +4,8 @@ namespace Tests;
 
 use Utilities\Logger;
 use Utilities\SessionManager;
+use Utilities\Configuration;
+use Utilities\ErrorHandler;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -12,12 +14,13 @@ use PHPUnit\Framework\TestCase;
  * Unit tests for the Logger utility.
  *
  * This test class focuses on verifying the proper functioning of the Logger utility.
- * It ensures log messages are correctly formatted and written to the desired location.
+ * It ensures that log messages are correctly formatted and written to the desired location.
  * Additionally, it checks how the Logger interacts with its dependencies, such as SessionManager.
  *
  * Features tested:
  * - Singleton pattern enforcement
  * - Log message recording with various severities and contexts
+ * - File and directory creation during logging
  * - Error handling during the logging process
  *
  * @category Tests
@@ -27,20 +30,44 @@ use PHPUnit\Framework\TestCase;
  */
 class LoggerTest extends TestCase
 {
+    /**
+     * Path to the log file.
+     *
+     * @var string
+     */
+    private $logFilePath;
+
+    /**
+     * Setup operations to run before each test.
+     *
+     * - Set log file path from configuration
+     * - Remove any existing log file to ensure a clean testing environment
+     * - Mock the SessionManager for controlled testing
+     */
     protected function setUp(): void
     {
         parent::setUp();
 
-        // Mock the SessionManager to prevent the actual startSession method from being executed
-        $mockedSessionManager = $this->createMock(SessionManager::class);
+        // Set log file path from configuration
+        $this->logFilePath = Configuration::get('logFilePath');
         
-        // Here, we specify that the startSession method should not actually be executed.
-        // Instead, we mock it to return null.
-        $mockedSessionManager->method('startSession');
+        // Remove log file to ensure a clean environment for each test
+        if (file_exists($this->logFilePath)) {
+            unlink($this->logFilePath);
+        }
+
+        // Mock the SessionManager
+        $mockedSessionManager = $this->createMock(SessionManager::class);
+        $mockedSessionManager->method('startSession')->willReturn(null);
 
         Logger::setSessionManager($mockedSessionManager);
     }
 
+    /**
+     * Cleanup operations to run after each test.
+     * 
+     * Resetting the Logger instance for isolation between tests.
+     */
     public function tearDown(): void
     {
         // Resetting the Logger instance after each test
@@ -48,22 +75,29 @@ class LoggerTest extends TestCase
     }
 
     /**
-     * Tests that the Logger can log messages.
+     * Test the logging capability of the Logger.
+     *
+     * This test ensures:
+     * - The log file is created if it doesn't exist
+     * - Log entries are written correctly with the given message
+     * - The Logger returns true upon successful logging
      */
     public function testLogMessage()
     {
         $logger = Logger::getInstance();
-        
-        // log file is 'test_log.log' for this test
-        // Logger::configure(SessionManager::getInstance(), ErrorHandler::getInstance(), 'test_log.log');
+        Logger::configure(new SessionManager(), new ErrorHandler());
 
         $result = $logger->log('Test message', 'info');
 
-        $this->assertTrue($result, 'Logger should successfully log messages.');
+        // Check if file exists
+        $this->assertFileExists($this->logFilePath, 'Log file was not created.');
 
-        // Additional assertions can be added here to check the content of 'test_log.log' 
-        // and ensure the log entry has been added correctly.
+        // Check file content
+        $logContent = file_get_contents($this->logFilePath);
+        $this->assertStringContainsString('Test message', $logContent, 'Log message was not written to the file.');
+
+        $this->assertTrue($result, 'Logger should successfully log messages.');
     }
 
-    // Additional tests for the Logger can be added below...
+    // Additional tests for various scenarios can be added ...
 }
