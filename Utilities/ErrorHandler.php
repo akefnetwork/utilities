@@ -48,7 +48,7 @@ class ErrorHandler implements ErrorHandlerInterface
      *
      * @param ErrorHandler|null $instance The ErrorHandler instance to set, or null to reset.
      */
-    public static function setInstance(?self $instance): void
+    public static function setInstance(?ErrorHandlerInterface $instance): void
     {
         static::$instance = $instance;
     }
