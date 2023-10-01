@@ -118,7 +118,7 @@ class Logger implements LoggerInterface
      *
      * @param Logger|null $instance The Logger instance to set, or null to reset.
      */
-    public static function setInstance(?self $instance): void
+    public static function setInstance(?LoggerInterface $instance): void
     {
         static::$instance = $instance;
     }
