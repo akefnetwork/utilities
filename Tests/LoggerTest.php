@@ -36,7 +36,7 @@ class LoggerTest extends TestCase
         
         // Here, we specify that the startSession method should not actually be executed.
         // Instead, we mock it to return null.
-        $mockedSessionManager->method('startSession')->willReturn(null);
+        $mockedSessionManager->method('startSession');
 
         Logger::setSessionManager($mockedSessionManager);
     }
