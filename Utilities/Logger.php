@@ -124,6 +124,20 @@ class Logger implements LoggerInterface
     }
 
     /**
+     * Set a custom SessionManager, typically for testing purposes.
+     *
+     * This method allows for an external SessionManager instance (usually a mock) to be set. 
+     * This is especially useful during unit testing where the real SessionManager instance isn't needed, 
+     * and a mock or stub should be used instead.
+     *
+     * @param SessionManager|null $sessionManager The SessionManager instance to set, or null to reset.
+     */
+    public static function setSessionManager(?SessionManager $sessionManager): void
+    {
+        self::$configuredSessionManager = $sessionManager;
+    }
+
+    /**
      * Record a message with a specific log level and additional context.
      *
      * @param string $message The locale key for the log message.
@@ -158,7 +172,6 @@ class Logger implements LoggerInterface
             return false;
         }
 
-        // Close the log file.
         fclose($logFile);
         return true;
     }
