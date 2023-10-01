@@ -3,23 +3,28 @@
 namespace Utilities;
 
 use Utilities\Contracts\LoggerInterface;
-use Utilities\ErrorHandler;
-use Utilities\SessionManager;
 use DateTime;
 
 /**
  * Class Logger
  *
- * The Logger class is a utility for logging messages with different log levels.
- * It implements a Singleton pattern to ensure only one instance is used across the application.
- * The Logger class is part of the Utilities namespace and is used throughout the application
- * for consistent logging of messages and events.
+ * The Logger class offers a unified method to record and manage log messages across various levels of severity.
+ * Employing the Singleton design pattern ensures only a single Logger instance is active, promoting efficient resource management.
+ *
+ * Features:
+ * - Record logs in a consistent format with timestamps.
+ * - Allow dynamic configuration of dependencies to maintain the Singleton pattern.
+ * - Support various log levels to categorize messages accordingly.
  *
  * Dependencies:
- * - SessionManager: Required for retrieving user information from the session.
- * - ErrorHandler: Required for handling errors that might occur during the logging process.
- * - LoggerInterface: The interface that this class implements, defining the contract for the Logger.
- * - DateTime: Used for generating timestamps for the log entries.
+ * - SessionManager: Retrieves user data from the session for contextual logging.
+ * - ErrorHandler: Manages errors that may arise during the logging process.
+ * - DateTime: Generates timestamps for each log entry.
+ *
+ * Usage Example:
+ * Logger::configure($sessionManager, $errorHandler, 'path_to_log_file.log');
+ * $logger = Logger::getInstance();
+ * $logger->log('Sample message', 'info');
  *
  * @category Utilities
  * @package  AkefNetwork
@@ -29,34 +34,47 @@ use DateTime;
 class Logger implements LoggerInterface
 {
     /**
-     * @var Logger Holds the single instance of the Logger class.
+     * @var Logger Single instance of the Logger class.
      */
     protected static $instance;
 
     /**
-     * @var string The file path to the log file.
+     * @var SessionManager Instance of the SessionManager to access user data.
+     */
+    protected static $configuredSessionManager;
+
+    /**
+     * @var ErrorHandler Instance of the ErrorHandler to manage logging errors.
+     */
+    protected static $configuredErrorHandler;
+
+    /**
+     * @var string Path to the log file where messages will be written.
+     */
+    protected static $configuredLogFilePath;
+
+    /**
+     * @var string The file path to store log messages.
      */
     protected $logFilePath;
 
     /**
-     * @var SessionManager Holds an instance of the SessionManager for retrieving user information.
+     * @var SessionManager Instance of the SessionManager for user information retrieval.
      */
     protected $sessionManager;
 
     /**
-     * @var ErrorHandler Holds an instance of the ErrorHandler for handling errors during logging.
+     * @var ErrorHandler Instance of the ErrorHandler for logging error management.
      */
     protected $errorHandler;
 
     /**
      * Logger constructor.
+     * Private to enforce Singleton pattern - only one instance can exist.
      *
-     * The constructor is private to prevent creating multiple instances.
-     * It initializes the SessionManager, ErrorHandler, and log file path.
-     *
-     * @param SessionManager $sessionManager An instance of the SessionManager.
-     * @param ErrorHandler $errorHandler An instance of the ErrorHandler.
-     * @param string $logFilePath The file path to the log file.
+     * @param SessionManager $sessionManager Instance of the SessionManager.
+     * @param ErrorHandler $errorHandler Instance of the ErrorHandler.
+     * @param string $logFilePath Path to the log file.
      */
     private function __construct(SessionManager $sessionManager, ErrorHandler $errorHandler, $logFilePath)
     {
@@ -66,58 +84,61 @@ class Logger implements LoggerInterface
     }
 
     /**
-     * Get the single instance of the Logger class.
+     * Set configuration for Logger dependencies.
      *
-     * The getInstance method checks if an instance already exists. If not, it creates a new instance
-     * and returns it. This method ensures that only one instance of the Logger class is used.
-     *
-     * @param SessionManager $sessionManager An instance of the SessionManager.
-     * @param ErrorHandler $errorHandler An instance of the ErrorHandler.
-     * @param string $logFilePath The file path to the log file.
-     * @return Logger The single instance of the Logger class.
+     * @param SessionManager $sessionManager Instance of the SessionManager.
+     * @param ErrorHandler $errorHandler Instance of the ErrorHandler.
+     * @param string $logFilePath Path to the log file.
      */
-    public static function getInstance(SessionManager $sessionManager, ErrorHandler $errorHandler, $logFilePath)
+    public static function configure(SessionManager $sessionManager, ErrorHandler $errorHandler, $logFilePath): void
+    {
+        self::$configuredSessionManager = $sessionManager;
+        self::$configuredErrorHandler = $errorHandler;
+        self::$configuredLogFilePath = $logFilePath;
+    }
+
+    /**
+     * Retrieve the single instance of Logger. If it doesn't exist, it's created.
+     *
+     * @return Logger The unique Logger instance.
+     */
+    public static function getInstance(): self
     {
         if (null === static::$instance) {
-            static::$instance = new static($sessionManager, $errorHandler, $logFilePath);
+            static::$instance = new static(self::$configuredSessionManager, self::$configuredErrorHandler, self::$configuredLogFilePath);
         }
-
         return static::$instance;
     }
 
     /**
-     * Log a message with a specific log level and context.
+     * Record a message with a specific log level and additional context.
      *
-     * The log method is used to log messages with different log levels. It formats the log entry,
-     * opens the log file, writes the entry, and closes the file. If any error occurs during this process,
-     * it is handled by the ErrorHandler.
-     *
-     * @param string $message The locale key of the message to be logged.
-     * @param string $level The level of log (e.g., 'info', 'error').
-     * @param array $context Additional context information (e.g., 'module', 'function').
-     * @return bool Returns true if the log entry was successfully written, false otherwise.
+     * @param string $message The locale key for the log message.
+     * @param string $level Severity level of the log (e.g., 'info', 'error').
+     * @param array $context Supplementary data for the log message.
+     * @return bool True if the message is logged successfully, false otherwise.
      */
     public function log(string $message, string $level, array $context = []): bool
     {
-        // Format the timestamp for the log entry.
+        // Timestamp generation for the log entry.
         $timestamp = (new DateTime())->format('Y-m-d H:i:s');
 
-        // Retrieve module, function, and user information from context or fallbacks.
+        // Extract module, function, and user details from context or provide defaults.
         $module = $context['module'] ?? (defined('__CLASS__') ? __CLASS__ : basename(__FILE__));
         $function = $context['function'] ?? (defined('__FUNCTION__') ? __FUNCTION__ : 'global');
         $user = $this->sessionManager->get('user_id') ?? 'System';
 
-        // Format the log entry.
+        // Assemble the log entry.
         $logEntry = "[$timestamp] [$module] [$function] [$user] [$level] $message\n";
 
-        // Open the log file for writing.
+        // Open log file for appending.
         $logFile = fopen($this->logFilePath, 'a');
         if (!$logFile) {
             $this->errorHandler->handleError('logger.error_open_file');
             return false;
         }
 
-        // Write the log entry to the file.
+        // Append log entry to the file.
         if (fwrite($logFile, $logEntry) === false) {
             $this->errorHandler->handleError('logger.error_write_file');
             fclose($logFile);
