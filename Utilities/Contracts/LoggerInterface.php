@@ -54,5 +54,5 @@ interface LoggerInterface
      * @param $errorHandler The ErrorHandler instance.
      * @param string $logFilePath Path to the log file.
      */
-    public static function configure($sessionManager, $errorHandler, $logFilePath): void;
+    public static function configure(SessionManager $sessionManager, ErrorHandler $errorHandler, $logFilePath): void;
 }
