@@ -145,34 +145,45 @@ class Logger implements LoggerInterface
      * @param array $context Supplementary data for the log message.
      * @return bool True if the message is logged successfully, false otherwise.
      */
+
     public function log(string $message, string $level, array $context = []): bool
-    {
-        // Timestamp generation for the log entry.
-        $timestamp = (new DateTime())->format('Y-m-d H:i:s');
+{
+    // Timestamp generation for the log entry.
+    $timestamp = (new \DateTime())->format('Y-m-d H:i:s');
 
-        // Extract module, function, and user details from context or provide defaults.
-        $module = $context['module'] ?? (defined('__CLASS__') ? __CLASS__ : basename(__FILE__));
-        $function = $context['function'] ?? (defined('__FUNCTION__') ? __FUNCTION__ : 'global');
-        $user = $this->sessionManager->get('user_id') ?? 'System';
+    // Extract module, function, and user details from context or provide defaults.
+    $module = $context['module'] ?? (defined('__CLASS__') ? __CLASS__ : basename(__FILE__));
+    $function = $context['function'] ?? (defined('__FUNCTION__') ? __FUNCTION__ : 'global');
+    $user = $this->sessionManager->get('user_id') ?? 'System';
 
-        // Assemble the log entry.
-        $logEntry = "[$timestamp] [$module] [$function] [$user] [$level] $message\n";
+    // Assemble the log entry.
+    $logEntry = "[$timestamp] [$module] [$function] [$user] [$level] $message\n";
 
-        // Open log file for appending.
-        $logFile = fopen($this->logFilePath, 'a');
-        if (!$logFile) {
-            $this->errorHandler->handleError('logger.error_open_file');
+    // Ensure the directory exists.
+    $dir = dirname($this->logFilePath);
+    if (!file_exists($dir)) {
+        if (!mkdir($dir, 0777, true)) {  // Allows recursive creation of nested directories.
+            $this->errorHandler->handleError('logger.error_create_directory');
             return false;
         }
-
-        // Append log entry to the file.
-        if (fwrite($logFile, $logEntry) === false) {
-            $this->errorHandler->handleError('logger.error_write_file');
-            fclose($logFile);
-            return false;
-        }
-
-        fclose($logFile);
-        return true;
     }
+
+    // Open log file for appending.
+    $logFile = fopen($this->logFilePath, 'a');
+    if (!$logFile) {
+        $this->errorHandler->handleError('logger.error_open_file');
+        return false;
+    }
+
+    // Append log entry to the file.
+    if (fwrite($logFile, $logEntry) === false) {
+        $this->errorHandler->handleError('logger.error_write_file');
+        fclose($logFile);
+        return false;
+    }
+
+    fclose($logFile);
+    return true;
+}
+
 }
