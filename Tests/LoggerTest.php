@@ -4,9 +4,10 @@ namespace Tests;
 
 use Utilities\Logger;
 use Utilities\SessionManager;
-use Utilities\Configuration;
+use Configuration\Configuration;
 use Utilities\ErrorHandler;
 use PHPUnit\Framework\TestCase;
+use org\bovigo\vfs\vfsStream;
 
 /**
  * Class LoggerTest
@@ -99,5 +100,5 @@ class LoggerTest extends TestCase
         $this->assertTrue($result, 'Logger should successfully log messages.');
     }
 
-    // Additional tests for various scenarios can be added ...
+    // Additional tests for various scenarios can be added below...
 }
