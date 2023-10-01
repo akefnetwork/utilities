@@ -4,7 +4,8 @@ namespace Utilities;
 
 use Utilities\Contracts\LoggerInterface;
 use DateTime;
-
+use Utilities\SessionManager;
+use Configuration\Configuration;
 /**
  * Class Logger
  *
