@@ -44,7 +44,7 @@ interface LoggerInterface
      *
      * @param self|null $instance The Logger instance to set, or null to reset.
      */
-    public static function setInstance(?self $instance): void;
+    public static function setInstance(?LoggerInterface $instance): void;
 
     /**
      * Set configuration for Logger dependencies.
