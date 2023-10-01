@@ -3,6 +3,8 @@
 namespace Utilities;
 
 use Configuration\Configuration;
+use Exception;
+use Utilities\Contracts\LocaleHandlerInterface;
 
 /**
  * LocaleHandler class
