@@ -88,8 +88,10 @@ class LoggerTest extends TestCase
         $mockedSessionManager = $this->createMock(SessionManager::class);
         $mockedSessionManager->method('startSession');
     
+        $mockedErrorHandler = $this->createMock(ErrorHandler::class);
+    
         $logger = Logger::getInstance();
-        Logger::configure($mockedSessionManager, new ErrorHandler());
+        Logger::configure($mockedSessionManager, $mockedErrorHandler);
     
         $result = $logger->log('Test message', 'info');
 
