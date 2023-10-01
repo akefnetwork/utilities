@@ -55,5 +55,4 @@ interface LoggerInterface
      * @param string $logFilePath Path to the log file.
      */
     public static function configure(\Utilities\SessionManager $sessionManager, \Utilities\ErrorHandler $errorHandler): void;
-
 }

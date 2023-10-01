@@ -90,7 +90,7 @@ class Logger implements LoggerInterface
      * @param ErrorHandler $errorHandler Instance of the ErrorHandler.
      * @param string $logFilePath Path to the log file.
      */
-    public static function configure(SessionManagerInterface $sessionManager, ErrorHandlerInterface $errorHandler): void
+    public static function configure(\Utilities\SessionManager $sessionManager, \Utilities\ErrorHandler $errorHandler): void
     {
         static::$instance->sessionManager = $sessionManager;
         static::$instance->errorHandler = $errorHandler;
