@@ -54,8 +54,8 @@ class LoggerTest extends TestCase
     {
         $logger = Logger::getInstance();
         
-        // Assuming the log file is 'test_log.log' for this test
-        Logger::configure(SessionManager::getInstance(), ErrorHandler::getInstance(), 'test_log.log');
+        // log file is 'test_log.log' for this test
+        // Logger::configure(SessionManager::getInstance(), ErrorHandler::getInstance(), 'test_log.log');
 
         $result = $logger->log('Test message', 'info');
 
