@@ -29,4 +29,30 @@ interface LoggerInterface
      * @return bool Returns true if the log entry was successfully written, false otherwise.
      */
     public function log(string $message, string $level, array $context = []): bool;
+
+    /**
+     * Retrieve the single instance of Logger. If it doesn't exist, it's created.
+     * Note: Static methods in interfaces are not common in PHP and this is for documentation purposes.
+     *
+     * @return self The unique Logger instance.
+     */
+    public static function getInstance(): self;
+
+    /**
+     * Set a custom Logger instance, typically for testing purposes.
+     * Note: Static methods in interfaces are not common in PHP and this is for documentation purposes.
+     *
+     * @param self|null $instance The Logger instance to set, or null to reset.
+     */
+    public static function setInstance(?self $instance): void;
+
+    /**
+     * Set configuration for Logger dependencies.
+     * Note: Static methods in interfaces are not common in PHP and this is for documentation purposes.
+     *
+     * @param $sessionManager The SessionManager instance.
+     * @param $errorHandler The ErrorHandler instance.
+     * @param string $logFilePath Path to the log file.
+     */
+    public static function configure($sessionManager, $errorHandler, $logFilePath): void;
 }
