@@ -7,8 +7,7 @@ namespace Utilities\Contracts;
  * 
  * Defines the contract that any LocaleHandler must adhere to.
  * This interface outlines the methods responsible for managing localization
- * in the application, including setting the locale, loading translations,
- * and translating locale keys.
+ * in the application, including setting the locale and translating locale keys.
  *
  * @category Contracts
  * @package  AkefNetwork
@@ -23,14 +22,6 @@ interface LocaleHandlerInterface
      * @return void
      */
     public function setLocale(string $defaultLocale): void;
-
-
-    /**
-     * Load translations for the current locale.
-     *
-     * @return void
-     */
-    public function loadTranslations(): void;
 
     /**
      * Translate the given locale key to the localized text.
