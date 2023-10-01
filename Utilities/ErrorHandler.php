@@ -26,12 +26,31 @@ class ErrorHandler implements ErrorHandlerInterface
         // Initialize ErrorHandler if needed.
     }
 
+    /**
+     * Retrieve the single instance of ErrorHandler. If it doesn't exist, it's created.
+     *
+     * @return ErrorHandler The unique ErrorHandler instance.
+     */
     public static function getInstance(): self
     {
         if (null === static::$instance) {
             static::$instance = new static();
         }
         return static::$instance;
+    }
+
+    /**
+     * Set a custom ErrorHandler instance, typically for testing purposes.
+     *
+     * This method allows for an external ErrorHandler instance (usually a mock) to be set.
+     * This is especially useful during unit testing where the real ErrorHandler instance isn't needed,
+     * and a mock or stub should be used instead.
+     *
+     * @param ErrorHandler|null $instance The ErrorHandler instance to set, or null to reset.
+     */
+    public static function setInstance(?self $instance): void
+    {
+        static::$instance = $instance;
     }
 
     public function handleError(string $messageKey, array $context = []): void
