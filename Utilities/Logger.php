@@ -111,6 +111,19 @@ class Logger implements LoggerInterface
     }
 
     /**
+     * Set a custom Logger instance, typically for testing purposes.
+     *
+     * This method allows for an external Logger instance (usually a mock) to be set. This is especially useful
+     * during unit testing where the real Logger instance isn't needed, and a mock or stub should be used instead.
+     *
+     * @param Logger|null $instance The Logger instance to set, or null to reset.
+     */
+    public static function setInstance(?self $instance): void
+    {
+        static::$instance = $instance;
+    }
+
+    /**
      * Record a message with a specific log level and additional context.
      *
      * @param string $message The locale key for the log message.
