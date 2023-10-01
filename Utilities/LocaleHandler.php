@@ -32,7 +32,7 @@ class LocaleHandler implements LocaleHandlerInterface
             $this->loadTranslations();
             Logger::getInstance()->log('localehandler.init_success', 'info', ['locale' => $this->locale]);
         } catch (Exception $e) {
-            ErrorHandler::getInstance()->handleError('localehandler.init_error', $e->getMessage());
+            ErrorHandler::getInstance()->handleError('localehandler.init_error', ['error_message' => $e->getMessage()]);
         }
     }
 
@@ -68,14 +68,14 @@ class LocaleHandler implements LocaleHandlerInterface
         $filePath = $this->translationFilePath . $this->locale . '.json';
 
         if (!file_exists($filePath)) {
-            ErrorHandler::getInstance()->handleError('localehandler.translations_not_found', "Translation file for {$this->locale} not found.");
+            ErrorHandler::getInstance()->handleError('localehandler.translations_not_found', ['error_message' => "Translation file for {$this->locale} not found."]);
             return;
         }
 
         $this->translations = json_decode(file_get_contents($filePath), true);
 
         if (json_last_error() !== JSON_ERROR_NONE) {
-            ErrorHandler::getInstance()->handleError('localehandler.translations_load_error', 'Error decoding translation file.');
+            ErrorHandler::getInstance()->handleError('localehandler.translations_load_error', ['error_message' => 'Error decoding translation file.']);
         }
 
         Logger::getInstance()->log('localehandler.translations_loaded', 'info', ['locale' => $this->locale]);
