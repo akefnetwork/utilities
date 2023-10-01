@@ -5,9 +5,9 @@ namespace Configuration;
 /**
  * Application Configuration Class
  * 
- * This class is used to store and retrieve various configuration settings for the application.
- * It includes settings related to the application environment, debugging,
- * URL, locale, timezone, and utility paths.
+ * This class is responsible for managing various configuration settings for 
+ * the application. It includes settings related to the application environment, 
+ * debugging, URL, locale, timezone, and utility paths.
  *
  * @category Configuration
  * @package  AkefNetwork
@@ -16,46 +16,14 @@ namespace Configuration;
  */
 class Configuration {
 
-    // Define the application root directory.
-    private const APP_ROOT = dirname(__DIR__);
+    // Define the application root directory as a static property.
+    private static $APP_ROOT;
 
     /**
      * All application configurations are stored in this array.
+     * We'll lazily load the configurations using the getConfigurations method.
      */
-    private static $configurations = [
-        // ... (all your configurations) ...
-
-        'session' => [
-            'timeout' => self::env('SESSION_TIMEOUT', 1800), // 30 minutes
-            'cookie_httponly' => true,
-            'cookie_secure' => self::env('SESSION_COOKIE_SECURE', false), // Set to true if using HTTPS
-        ],
-
-        'error_handling' => [
-            'display_errors' => self::env('DISPLAY_ERRORS', false),
-            // ... other error handling configurations ...
-        ],
-
-        'available_locales' => ['en', 'es', 'fr'],
-
-        'paths' => [
-            'errorHandler' => self::APP_ROOT . '/Utilities/ErrorHandler.php',
-            'logger' => self::APP_ROOT . '/Utilities/Logger.php',
-            'localeHandler' => self::APP_ROOT . '/Utilities/LocaleHandler.php',
-            'uploadDir' => self::APP_ROOT . '/uploads', // Ensure correct permissions are set for this directory.
-            // ... additional utility paths ...
-        ],
-
-        'localization' => [
-            'available_locales' => ['en', 'es', 'fr'],
-            'default_locale' => self::env('APP_LOCALE', 'en'),
-            'translations_path' => self::APP_ROOT . '/lang', // Ensure this directory exists and contains translation files.
-        ],
-
-        'logFilePath' => '../Logs/app.log',
-
-        // ... other configurations ...
-    ];
+    private static $configurations;
 
     /**
      * Retrieve a configuration value by its key.
@@ -65,15 +33,61 @@ class Configuration {
      * @return mixed The configuration value.
      */
     public static function get($key, $default = null) {
-        return static::$configurations[$key] ?? $default;
+        $configs = self::getConfigurations();
+        return $configs[$key] ?? $default;
     }
 
     /**
-     * Utility function to retrieve environment variables or return a default value.
+     * Load and return the configurations.
      * 
-     * @param string $key The key of the environment variable to retrieve.
-     * @param mixed $default The default value to return if the environment variable isn't found.
-     * @return mixed The value of the environment variable.
+     * @return array The configurations array.
+     */
+    private static function getConfigurations() {
+        if (self::$configurations) {
+            return self::$configurations;
+        }
+
+        // Set the APP_ROOT value if it's not set.
+        if (!self::$APP_ROOT) {
+            self::$APP_ROOT = dirname(__DIR__);
+        }
+
+        // Define your configurations here.
+        self::$configurations = [
+            'session' => [
+                'timeout' => self::env('SESSION_TIMEOUT', 1800),
+                'cookie_httponly' => true,
+                'cookie_secure' => self::env('SESSION_COOKIE_SECURE', false)
+            ],
+            'error_handling' => [
+                'display_errors' => self::env('DISPLAY_ERRORS', false),
+                // ... other error handling configurations ...
+            ],
+            'available_locales' => ['en', 'es', 'fr'],
+            'paths' => [
+                'errorHandler' => self::$APP_ROOT . '/Utilities/ErrorHandler.php',
+                'logger' => self::$APP_ROOT . '/Utilities/Logger.php',
+                'localeHandler' => self::$APP_ROOT . '/Utilities/LocaleHandler.php',
+                'uploadDir' => self::$APP_ROOT . '/uploads'
+            ],
+            'localization' => [
+                'available_locales' => ['en', 'es', 'fr'],
+                'default_locale' => self::env('APP_LOCALE', 'en'),
+                'translations_path' => self::$APP_ROOT . '/lang'
+            ],
+            'logFilePath' => '../Logs/app.log',
+            // ... other configurations ...
+        ];
+
+        return self::$configurations;
+    }
+
+    /**
+     * Check if the env function exists, if not, define it.
+     * 
+     * @param string $key The environment variable key to retrieve.
+     * @param mixed $default The default value if the environment variable isn't found.
+     * @return mixed The environment variable value.
      */
     private static function env($key, $default = null) {
         $value = getenv($key);
