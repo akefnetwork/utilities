@@ -1,5 +1,7 @@
 <?php
 
+namespace Configuration;
+
 /**
  * Application Configuration File
  * 
@@ -107,7 +109,7 @@ return [
         'default_locale' => env('APP_LOCALE', 'en'),
         'translations_path' => APP_ROOT . '/lang', // Ensure this directory exists and contains translation files.
     ],
-    
+
     'logFilePath' => '../Logs/app.log',
 
     // ... other configurations ...
