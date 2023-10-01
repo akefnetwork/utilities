@@ -42,4 +42,20 @@ interface ErrorHandlerInterface
      * @return void
      */
     public function handleException(Throwable $exception): void;
+
+    /**
+     * Retrieve the single instance of ErrorHandler. If it doesn't exist, it's created.
+     * Note: Static methods in interfaces are not common in PHP and this is for documentation purposes.
+     *
+     * @return self The unique ErrorHandler instance.
+     */
+    public static function getInstance(): self;
+
+    /**
+     * Set a custom ErrorHandler instance, typically for testing purposes.
+     * Note: Static methods in interfaces are not common in PHP and this is for documentation purposes.
+     *
+     * @param self|null $instance The ErrorHandler instance to set, or null to reset.
+     */
+    public static function setInstance(?self $instance): void;
 }
