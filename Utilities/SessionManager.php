@@ -80,7 +80,7 @@ class SessionManager implements SessionManagerInterface
      *
      * @return void
      */
-    protected function startSession(): void
+    public function startSession(): void
     {
         if (session_status() === PHP_SESSION_NONE) {
             // Set secure session configurations.
