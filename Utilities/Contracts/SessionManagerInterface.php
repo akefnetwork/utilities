@@ -16,12 +16,12 @@ namespace Utilities\Contracts;
  */
 interface SessionManagerInterface
 {
-    public static function startSession(): void;
-    public static function set(string $key, $value): void;
-    public static function get(string $key);
-    public static function destroySession(): void;
-    public static function setFlash(string $key, $message): void;
-    public static function getFlash(string $key);
-    public static function setUserAuthData($userData): void;
-    public static function getUserAuthData();
+    public function startSession(): void;
+    public function set(string $key, $value): void;
+    public function get(string $key);
+    public function destroySession(): void;
+    public function setFlash(string $key, $message): void;
+    public function getFlash(string $key);
+    public function setUserAuthData($userData): void;
+    public function getUserAuthData();
 }
