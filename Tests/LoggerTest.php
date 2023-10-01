@@ -85,9 +85,12 @@ class LoggerTest extends TestCase
      */
     public function testLogMessage()
     {
+        $mockedSessionManager = $this->createMock(SessionManager::class);
+        $mockedSessionManager->method('startSession')->willReturn(null);
+    
         $logger = Logger::getInstance();
-        Logger::configure(new SessionManager(), new ErrorHandler());
-
+        Logger::configure($mockedSessionManager, new ErrorHandler());
+    
         $result = $logger->log('Test message', 'info');
 
         // Check if file exists
