@@ -59,7 +59,7 @@ class LoggerTest extends TestCase
 
         // Mock the SessionManager
         $mockedSessionManager = $this->createMock(SessionManager::class);
-        $mockedSessionManager->method('startSession')->willReturn(null);
+        $mockedSessionManager->method('startSession');
 
         Logger::setSessionManager($mockedSessionManager);
     }
