@@ -146,7 +146,7 @@ class SessionManager implements SessionManagerInterface
      * @param string $message The message content.
      * @return void
      */
-    public function setFlash(string $key, string $message): void
+    public function setFlash(string $key, $message): void
     {
         $_SESSION['flash'][$key] = $message;
     }
