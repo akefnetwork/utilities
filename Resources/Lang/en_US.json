@@ -3,6 +3,8 @@
     "session.start_failure": "Failed to start the session.",
     "session.destroy_success": "Session destroyed successfully.",
     "session.destroy_failure": "Failed to destroy the session.",
+    "session.timed_out": "Session expired due to inactivity.",
+    "session.destroyed": "Session terminated successfully.",
     "logger.init_success": "Logger initialized successfully.",
     "logger.init_failure": "Logger initialization failed.",
     "localehandler.init_success": "LocaleHandler initialized successfully with locale {locale}.",
