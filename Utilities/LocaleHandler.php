@@ -3,102 +3,151 @@
 namespace Utilities;
 
 use Configuration\Configuration;
-use Exception;
-use Utilities\Contracts\LocaleHandlerInterface;
-
 
 /**
- * LocaleHandler Utility
- *
- * This class is responsible for managing the application's localization.
- * It determines the user's locale, loads translations, and provides
- * localized text based on locale keys.
- *
- * Processes involved include:
- * 1. Determining the user's locale.
- * 2. Loading translations for the determined locale.
- * 3. Fetching translations using keys.
+ * LocaleHandler class
+ * 
+ * The LocaleHandler class is responsible for managing the application's locale settings and translations.
+ * It provides functionalities to set and get the current locale, load translations, and fetch translations for specific keys.
+ * 
+ * Usage:
+ * 1. Obtain an instance using the `getInstance()` method.
+ * 2. Set or get the locale using the `setLocale()` and `getLocale()` methods.
+ * 3. Fetch translations using the `translate()` method.
+ * 
+ * Note:
+ * This class also logs specific events and handles errors related to translations.
  *
  * @category Utilities
- * @package  AkefNetwork
+ * @package  LocaleHandler
  * @author   Brahim Akef <b@akef.net>
- * @link     https://github.com/akefnetwork
+ * @link     http://github.com/akefnetwork
  */
 class LocaleHandler implements LocaleHandlerInterface
 {
-    private static $instance;
-    private $locale;
-    private $translations;
-    private $translationFilePath;
+    /**
+     * @var LocaleHandler|null The singleton instance of LocaleHandler.
+     */
+    private static ?LocaleHandler $instance = null;
 
-    private function __construct(string $defaultLocale)
+    /**
+     * @var string The currently set locale.
+     */
+    private string $locale;
+
+    /**
+     * @var string The default locale to fallback to.
+     */
+    private string $defaultLocale;
+
+    /**
+     * @var array The loaded translations.
+     */
+    private array $translations = [];
+
+    /**
+     * @var Logger The logger instance to log events.
+     */
+    private Logger $logger;
+
+    /**
+     * @var ErrorHandler The error handler instance to handle translation errors.
+     */
+    private ErrorHandler $errorHandler;
+
+    /**
+     * @var SessionManager The session manager instance to fetch and store the locale in session.
+     */
+    private SessionManager $sessionManager;
+
+    /**
+     * Constructor is private to ensure singleton behavior.
+     */
+    private function __construct()
     {
-        $this->translationFilePath = Configuration::get('localization.translations_path');
-
-        try {
-            $this->setLocale($defaultLocale);
-            $this->loadTranslations();
-            Logger::getInstance()->log('localehandler.init_success', 'info', ['locale' => $this->locale]);
-        } catch (Exception $e) {
-            ErrorHandler::getInstance()->handleError('localehandler.init_error', ['error_message' => $e->getMessage()]);
-        }
+        $this->logger = Logger::getInstance();
+        $this->errorHandler = ErrorHandler::getInstance();
+        $this->sessionManager = SessionManager::getInstance();
+        $this->defaultLocale = Configuration::get('localization.default_locale', 'en_US');
     }
 
-    public static function getInstance(): self
+    /**
+     * Provides the singleton instance of LocaleHandler.
+     * 
+     * @return LocaleHandler The singleton instance.
+     */
+    public static function getInstance(): LocaleHandler
     {
-        if (null === static::$instance) {
-            $defaultLocale = Configuration::get('localization.default_locale', 'en');
-            static::$instance = new static($defaultLocale);
+        if (null === self::$instance) {
+            self::$instance = new self();
         }
-
-        return static::$instance;
+        return self::$instance;
     }
 
-    public function setLocale(string $defaultLocale): void
+    /**
+     * Sets the application locale.
+     * 
+     * This method sets the locale for the application. If no locale is provided, it tries to fetch the locale from the SessionManager.
+     * After setting the locale, it logs the event.
+     *
+     * @param string|null $locale The locale to set. If null, fetches from SessionManager.
+     * @return void
+     */
+    public function setLocale(?string $locale = null): void
     {
-        // 1. Check for a user's preference stored in session.
-        $this->locale = SessionManager::getInstance()->getUserPreferredLocale();
-
-        // 2. If not set, check the browser's Accept-Language header.
-        if (!$this->locale && isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])) {
-            $this->locale = substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2);
+        if (!$locale) {
+            $locale = $this->sessionManager->get('locale', $this->defaultLocale);
         }
-
-        // 3. Fallback to the provided default locale if necessary.
-        if (!$this->locale) {
-            $this->locale = $defaultLocale;
-        }
-
-        Logger::getInstance()->log('localehandler.setlocale', 'info', ['locale' => $this->locale]);
+        $this->locale = $locale;
+        $this->logger->log('localehandler.setlocale', 'info', ['locale' => $this->locale]);
     }
 
-    public function loadTranslations(): void
+    /**
+     * Gets the current application locale.
+     * 
+     * @return string The current locale.
+     */
+    public function getLocale(): string
     {
-        $filePath = $this->translationFilePath . '/' . $this->locale . '.json';
+        return $this->locale;
+    }
 
-        if (!file_exists($filePath)) {
-            ErrorHandler::getInstance()->handleError('localehandler.translations_not_found', ['error_message' => "Translation file for {$this->locale} not found."]);
+    /**
+     * Loads translations from the specified translation file.
+     * 
+     * @param string $translationFilePath The path to the translation file.
+     * @return void
+     */
+    private function loadTranslations(string $translationFilePath): void
+    {
+        if (!file_exists($translationFilePath)) {
+            $this->errorHandler->handleError('localehandler.translations_not_found');
             return;
         }
 
-        $this->translations = json_decode(file_get_contents($filePath), true);
-
+        $translations = json_decode(file_get_contents($translationFilePath), true);
         if (json_last_error() !== JSON_ERROR_NONE) {
-            ErrorHandler::getInstance()->handleError('localehandler.translations_load_error', ['error_message' => 'Error decoding translation file.']);
+            $this->errorHandler->handleError('localehandler.translations_load_error');
+            return;
         }
 
-        Logger::getInstance()->log('localehandler.translations_loaded', 'info', ['locale' => $this->locale]);
+        $this->translations = $translations;
     }
 
+    /**
+     * Translates a given key using the loaded translations.
+     * 
+     * If the key is not found in the translations, it logs a warning and returns the key itself.
+     *
+     * @param string $key The key to translate.
+     * @return string The translated string or the key itself if not found.
+     */
     public function translate(string $key): string
     {
-        if (isset($this->translations[$key])) {
-            return $this->translations[$key];
+        if (!isset($this->translations[$key])) {
+            $this->logger->log('localehandler.translation_not_found', 'warning', ['key' => $key]);
+            return $key;
         }
-
-        Logger::getInstance()->log('localehandler.translation_not_found', 'warning', ['key' => $key]);
-
-        // Fallback to key if translation doesn't exist.
-        return $key;
+        return $this->translations[$key];
     }
 }
