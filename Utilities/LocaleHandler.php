@@ -30,9 +30,9 @@ class LocaleHandler implements LocaleHandlerInterface
         try {
             $this->setLocale($defaultLocale);
             $this->loadTranslations();
-            Logger::getInstance()->log('localehandler.init_success', 'info', ['locale' => $this->locale]);
+            Logger::getInstance()->log('LocaleHandler initialized successfully', 'info', ['locale' => $this->locale]);
         } catch (Exception $e) {
-            ErrorHandler::getInstance()->handleError('localehandler.init_error', ['error_message' => $e->getMessage()]);
+            ErrorHandler::getInstance()->handleError('Failed to initialize LocaleHandler', ['error_message' => $e->getMessage()]);
         }
     }
 
@@ -60,25 +60,26 @@ class LocaleHandler implements LocaleHandlerInterface
             $this->locale = $defaultLocale;
         }
 
-        Logger::getInstance()->log('localehandler.setlocale', 'info', ['locale' => $this->locale]);
+        Logger::getInstance()->log('Locale set successfully', 'info', ['locale' => $this->locale]);
     }
 
     public function loadTranslations(): void
     {
-        $filePath = $this->translationFilePath . $this->locale . '.json';
+        $filePath = $this->translationFilePath . '/' . $this->locale . '.json';
 
         if (!file_exists($filePath)) {
-            ErrorHandler::getInstance()->handleError('localehandler.translations_not_found', ['error_message' => "Translation file for {$this->locale} not found."]);
+            ErrorHandler::getInstance()->handleError('Translation file not found', ['locale' => $this->locale]);
             return;
         }
 
         $this->translations = json_decode(file_get_contents($filePath), true);
 
         if (json_last_error() !== JSON_ERROR_NONE) {
-            ErrorHandler::getInstance()->handleError('localehandler.translations_load_error', ['error_message' => 'Error decoding translation file.']);
+            ErrorHandler::getInstance()->handleError('Error decoding translation file', ['locale' => $this->locale]);
+            return;
         }
 
-        Logger::getInstance()->log('localehandler.translations_loaded', 'info', ['locale' => $this->locale]);
+        Logger::getInstance()->log('Translations loaded successfully', 'info', ['locale' => $this->locale]);
     }
 
     public function translate(string $key): string
@@ -87,7 +88,7 @@ class LocaleHandler implements LocaleHandlerInterface
             return $this->translations[$key];
         }
 
-        Logger::getInstance()->log('localehandler.translation_not_found', 'warning', ['key' => $key]);
+        Logger::getInstance()->log('Translation key not found', 'warning', ['key' => $key]);
 
         // Fallback to key if translation doesn't exist.
         return $key;
